@@ -4,6 +4,15 @@ import { useAuth } from '../lib/auth';
 import { backendConfigured } from '../lib/api';
 import { HandKeyStage } from '../three/HandKey';
 
+/**
+ * Two default workshop accounts seeded on the backend, shown here so anyone
+ * evaluating the app can sign in without being handed a password out of band.
+ */
+const DEMO_ACCOUNTS = [
+  { email: 'admin@servicedesk.local', password: 'Workshop2026!', role: 'Admin', name: 'Nasrin Akter' },
+  { email: 'workshop@servicedesk.local', password: 'Workshop2026!', role: 'Workshop', name: 'Kamal Hossain' },
+];
+
 export function LoginView() {
   const { login, devLogin, devBypassEnabled } = useAuth();
   const [email, setEmail] = useState('');
@@ -28,6 +37,12 @@ export function LoginView() {
     } finally {
       setBusy(false);
     }
+  }
+
+  function fillDemo(account: (typeof DEMO_ACCOUNTS)[number]) {
+    setError(null);
+    setEmail(account.email);
+    setPassword(account.password);
   }
 
   async function handleDev() {
@@ -111,6 +126,23 @@ export function LoginView() {
             <p className="login__hint">
               Workshop access only. All fleet, due-date and call-list data is computed on the backend — the frontend just renders what the API returns.
             </p>
+
+            <div className="login__demo" role="note">
+              <p className="login__demo-title">Test accounts — click to fill</p>
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  type="button"
+                  key={account.email}
+                  className="login__demo-row"
+                  onClick={() => fillDemo(account)}
+                >
+                  <span className="login__demo-role">{account.role}</span>
+                  <span className="login__demo-creds">
+                    <code>{account.email}</code> / <code>{account.password}</code>
+                  </span>
+                </button>
+              ))}
+            </div>
 
             <form className="login__form" onSubmit={handleSubmit} noValidate>
               <label className="login__field">

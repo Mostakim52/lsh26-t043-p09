@@ -1202,6 +1202,16 @@ tr[data-status='dueSoon'] td:first-child { box-shadow: inset 3px 0 0 var(--soon)
 .login__dev:hover { background: var(--surface-3); color: var(--text); }
 .login__faint { font-size: 11px; color: var(--text-3); line-height: 1.5; }
 .login__faint code { font-family: var(--mono); background: var(--surface-2); padding: 1px 5px; border-radius: 4px; }
+.login__demo { display: grid; gap: 6px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line-2); }
+.login__demo-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-3); }
+.login__demo-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  border: 0; background: transparent; padding: 4px 0; cursor: pointer; text-align: left;
+}
+.login__demo-row:hover .login__demo-creds { color: var(--accent); }
+.login__demo-role { font-size: 11px; font-weight: 700; color: var(--text-2); flex-shrink: 0; }
+.login__demo-creds { font-size: 11px; color: var(--text-2); }
+.login__demo-creds code { font-family: var(--mono); background: var(--surface-3); padding: 1px 5px; border-radius: 4px; }
 .login__panel-foot { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: var(--text-3); border-top: 1px solid var(--line); padding-top: 12px; }
 .login__panel-foot a { color: var(--text-2); text-decoration: none; }
 
