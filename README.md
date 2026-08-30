@@ -4,7 +4,7 @@ Solution for **LofiStack Hackathon 2026 — P09**
 
 ## Project information
 
-- **Team:** `t043`
+- **Team:** `Parle Theka`
 - **Team ID:** `LSH26-T043`
 - **Problem:** `P09 — Vehicle Service Due Predictor`
 - **Live application:** <https://servicedeskt043.vercel.app>
