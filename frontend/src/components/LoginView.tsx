@@ -1,8 +1,11 @@
 import { useState } from 'react';
 
 import { useAuth } from '../lib/auth';
-import { backendConfigured } from '../lib/api';
+import { backendConfigured, fetchVehicleByPlate } from '../lib/api';
+import { navigate } from '../lib/router';
 import { HandKeyStage } from '../three/HandKey';
+
+type Mode = 'employee' | 'owner';
 
 /**
  * Two default workshop accounts seeded on the backend, shown here so anyone
@@ -15,8 +18,10 @@ const DEMO_ACCOUNTS = [
 
 export function LoginView() {
   const { login, devLogin, devBypassEnabled } = useAuth();
+  const [mode, setMode] = useState<Mode>('employee');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [plate, setPlate] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -32,6 +37,27 @@ export function LoginView() {
     setBusy(true);
     try {
       await login(email, password);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleOwnerSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (busy) return;
+    setError(null);
+    if (!plate.trim()) {
+      setError('Enter your license plate.');
+      return;
+    }
+    setBusy(true);
+    try {
+      // Confirm the plate resolves before navigating, so a typo shows an
+      // inline error here instead of a "no vehicle found" full-page state.
+      await fetchVehicleByPlate(plate.trim());
+      navigate({ name: 'my-vehicle', plate: plate.trim() });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -123,86 +149,144 @@ export function LoginView() {
 
           <div className="login__form-wrap">
             <h2 className="login__title">Sign In</h2>
-            <p className="login__hint">
-              Workshop access only. All fleet, due-date and call-list data is computed on the backend — the frontend just renders what the API returns.
-            </p>
 
-            <div className="login__demo" role="note">
-              <p className="login__demo-title">Test accounts — click to fill</p>
-              {DEMO_ACCOUNTS.map((account) => (
-                <button
-                  type="button"
-                  key={account.email}
-                  className="login__demo-row"
-                  onClick={() => fillDemo(account)}
-                >
-                  <span className="login__demo-role">{account.role}</span>
-                  <span className="login__demo-creds">
-                    <code>{account.email}</code> / <code>{account.password}</code>
-                  </span>
-                </button>
-              ))}
+            <div className="login__mode-toggle" role="tablist" aria-label="Sign-in mode">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === 'employee'}
+                className="login__mode-btn"
+                data-active={mode === 'employee'}
+                onClick={() => { setMode('employee'); setError(null); }}
+              >
+                Employee
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === 'owner'}
+                className="login__mode-btn"
+                data-active={mode === 'owner'}
+                onClick={() => { setMode('owner'); setError(null); }}
+              >
+                Vehicle owner
+              </button>
             </div>
 
-            <form className="login__form" onSubmit={handleSubmit} noValidate>
-              <label className="login__field">
-                <span className="sr-only">Email or username</span>
-                <input
-                  type="email"
-                  inputMode="email"
-                  autoComplete="username"
-                  placeholder="Email or Username"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  aria-label="Email or Username"
-                />
-              </label>
+            {mode === 'employee' ? (
+              <>
+                <p className="login__hint">
+                  Workshop access only. All fleet, due-date and call-list data is computed on the backend — the frontend just renders what the API returns.
+                </p>
 
-              <label className="login__field">
-                <span className="sr-only">Password</span>
-                <input
-                  type={showPw ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  aria-label="Password"
-                />
-                <button
-                  type="button"
-                  className="login__eye"
-                  aria-label={showPw ? 'Hide password' : 'Show password'}
-                  onClick={() => setShowPw((v) => !v)}
-                >
-                  {showPw ? '◯' : '◎'}
-                </button>
-              </label>
+                <div className="login__demo" role="note">
+                  <p className="login__demo-title">Test accounts — click to fill</p>
+                  {DEMO_ACCOUNTS.map((account) => (
+                    <button
+                      type="button"
+                      key={account.email}
+                      className="login__demo-row"
+                      onClick={() => fillDemo(account)}
+                    >
+                      <span className="login__demo-role">{account.role}</span>
+                      <span className="login__demo-creds">
+                        <code>{account.email}</code> / <code>{account.password}</code>
+                      </span>
+                    </button>
+                  ))}
+                </div>
 
-              <div className="login__row">
-                <span className="login__backend-note">
-                  {backendConfigured ? 'Backend: live' : 'If Backend is offline: sample mode — use Dev Bypass'}
-                </span>
-                <button type="button" className="login__link" onClick={() => alert('Contact Service Desk admin to reset your password.')}>
-                  Forgot password?
-                </button>
-              </div>
+                <form className="login__form" onSubmit={handleSubmit} noValidate>
+                  <label className="login__field">
+                    <span className="sr-only">Email or username</span>
+                    <input
+                      type="email"
+                      inputMode="email"
+                      autoComplete="username"
+                      placeholder="Email or Username"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      aria-label="Email or Username"
+                    />
+                  </label>
 
-              {error ? <p className="login__error" role="alert">{error}</p> : null}
+                  <label className="login__field">
+                    <span className="sr-only">Password</span>
+                    <input
+                      type={showPw ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      aria-label="Password"
+                    />
+                    <button
+                      type="button"
+                      className="login__eye"
+                      aria-label={showPw ? 'Hide password' : 'Show password'}
+                      onClick={() => setShowPw((v) => !v)}
+                    >
+                      {showPw ? '◯' : '◎'}
+                    </button>
+                  </label>
 
-              <button type="submit" className="login__submit" disabled={busy}>
-                {busy ? 'Signing in…' : '→ Sign In'}
-              </button>
+                  <div className="login__row">
+                    <span className="login__backend-note">
+                      {backendConfigured ? 'Backend: live' : 'If Backend is offline: sample mode — use Dev Bypass'}
+                    </span>
+                    <button type="button" className="login__link" onClick={() => alert('Contact Service Desk admin to reset your password.')}>
+                      Forgot password?
+                    </button>
+                  </div>
 
-              {devBypassEnabled ? (
-                <button type="button" className="login__dev" onClick={handleDev} disabled={busy}>
-                  Dev bypass — enter without backend
-                </button>
-              ) : null}
+                  {error ? <p className="login__error" role="alert">{error}</p> : null}
 
-              <p className="login__faint">
-                Demo hint: with no backend, Dev bypass works with any details. With a backend, use a real account (POST <code>/api/v1/auth/login</code>).
-              </p>
-            </form>
+                  <button type="submit" className="login__submit" disabled={busy}>
+                    {busy ? 'Signing in…' : '→ Sign In'}
+                  </button>
+
+                  {devBypassEnabled ? (
+                    <button type="button" className="login__dev" onClick={handleDev} disabled={busy}>
+                      Dev bypass — enter without backend
+                    </button>
+                  ) : null}
+
+                  <p className="login__faint">
+                    Demo hint: with no backend, Dev bypass works with any details. With a backend, use a real account (POST <code>/api/v1/auth/login</code>).
+                  </p>
+                </form>
+              </>
+            ) : (
+              <>
+                <p className="login__hint">
+                  No account needed. Enter your vehicle's license plate to see what's due — fixed dates, service intervals and distance run, straight from the workshop's records.
+                </p>
+
+                <form className="login__form" onSubmit={handleOwnerSubmit} noValidate>
+                  <label className="login__field">
+                    <span className="sr-only">License plate</span>
+                    <input
+                      type="text"
+                      autoComplete="off"
+                      placeholder="License plate, e.g. Dhaka Metro Ba 18-3510"
+                      value={plate}
+                      onChange={(e) => setPlate(e.target.value)}
+                      aria-label="License plate"
+                    />
+                  </label>
+
+                  {error ? <p className="login__error" role="alert">{error}</p> : null}
+
+                  <button type="submit" className="login__submit" disabled={busy}>
+                    {busy ? 'Looking up…' : '→ Find my vehicle'}
+                  </button>
+
+                  <p className="login__faint">
+                    This looks up your vehicle by plate only — no password, no personal data beyond your name is shown.
+                  </p>
+                </form>
+              </>
+            )}
           </div>
 
           <footer className="login__panel-foot">

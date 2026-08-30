@@ -1212,6 +1212,15 @@ tr[data-status='dueSoon'] td:first-child { box-shadow: inset 3px 0 0 var(--soon)
 .login__demo-role { font-size: 11px; font-weight: 700; color: var(--text-2); flex-shrink: 0; }
 .login__demo-creds { font-size: 11px; color: var(--text-2); }
 .login__demo-creds code { font-family: var(--mono); background: var(--surface-3); padding: 1px 5px; border-radius: 4px; }
+.login__mode-toggle { display: flex; gap: 6px; padding: 4px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line-2); }
+.login__mode-btn { flex: 1; border: 0; background: transparent; padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--text-3); cursor: pointer; }
+.login__mode-btn[data-active="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgb(0 0 0 / 20%); }
+
+/* my-vehicle — the anonymous, read-only owner self-lookup page */
+.my-vehicle__topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.my-vehicle__hero { display: grid; gap: 4px; margin-bottom: 18px; }
+.my-vehicle__hero h1 { margin: 0; font-size: 30px; }
+.my-vehicle__foot { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 8px; }
 .login__panel-foot { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; color: var(--text-3); border-top: 1px solid var(--line); padding-top: 12px; }
 .login__panel-foot a { color: var(--text-2); text-decoration: none; }
 

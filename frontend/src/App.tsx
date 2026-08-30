@@ -8,6 +8,7 @@ import { hrefFor, navigate, useRoute, type Route } from './lib/router';
 import { FleetProvider, useFleet } from './lib/store';
 import { FleetView } from './components/FleetView';
 import { LoginView } from './components/LoginView';
+import { MyVehicleView } from './components/MyVehicleView';
 import { OwnersView } from './components/OwnersView';
 import { RulesView } from './components/RulesView';
 import { TodayView } from './components/TodayView';
@@ -35,6 +36,12 @@ export default function App() {
 function AuthGate() {
   const { isAuthenticated, loading } = useAuth();
   const route = useRoute();
+
+  // Vehicle owners never authenticate — this route is anonymous by design,
+  // fetched from the public plate-lookup endpoint, not the fleet-wide store.
+  if (route.name === 'my-vehicle') {
+    return <MyVehicleView plate={route.plate} />;
+  }
 
   if (loading) {
     return (

@@ -138,6 +138,29 @@ export async function fetchHealth(): Promise<{ ok: boolean; asOf: string }> {
   return getJson<{ ok: boolean; asOf: string }>(`/health`);
 }
 
+// ---------------------------------------------------------------- public (no auth) owner self-lookup
+export type PublicVehicleStatus = Omit<VehicleStatus, 'owner'> & {
+  owner: { id: string; name: string };
+};
+
+/**
+ * Anonymous plate lookup for the "I'm a vehicle owner, not an employee" login
+ * mode. Deliberately does not attach the Bearer token, and the backend route
+ * behind it never requires one.
+ */
+export async function fetchVehicleByPlate(plate: string): Promise<PublicVehicleStatus> {
+  if (!backendConfigured) throw new Error('Plate lookup needs a live backend — none is configured.');
+  const res = await fetch(`${BASE}/public/vehicles/by-plate/${encodeURIComponent(plate)}`, {
+    headers: { Accept: 'application/json' },
+  });
+  if (!res.ok) {
+    if (res.status === 404) throw new Error('No vehicle found for that plate.');
+    const detail = await res.text().catch(() => '');
+    throw new Error(`Lookup failed (HTTP ${res.status}). ${detail}`.trim());
+  }
+  return (await res.json()) as PublicVehicleStatus;
+}
+
 // ---------------------------------------------------------------- mutation
 export interface CompletionResponse {
   record: ServiceRecord;

@@ -6,7 +6,8 @@ export type Route =
   | { name: 'owners' }
   | { name: 'rules' }
   | { name: 'vehicle'; id: string }
-  | { name: 'login' };
+  | { name: 'login' }
+  | { name: 'my-vehicle'; plate: string };
 
 /**
  * A hash router in a dozen lines. Vehicle pages are worth a real URL — the workshop
@@ -28,6 +29,8 @@ export function parseHash(hash: string): Route {
       return { name: 'rules' };
     case 'vehicle':
       return param ? { name: 'vehicle', id: decodeURIComponent(param) } : { name: 'fleet' };
+    case 'my-vehicle':
+      return param ? { name: 'my-vehicle', plate: decodeURIComponent(param) } : { name: 'login' };
     default:
       return { name: 'today' };
   }
@@ -37,6 +40,8 @@ export function hrefFor(route: Route): string {
   switch (route.name) {
     case 'vehicle':
       return `#/vehicle/${encodeURIComponent(route.id)}`;
+    case 'my-vehicle':
+      return `#/my-vehicle/${encodeURIComponent(route.plate)}`;
     case 'today':
       return '#/';
     case 'login':

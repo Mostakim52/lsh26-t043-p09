@@ -34,3 +34,17 @@ export async function loadHistoryForVehicle(vehicleId: string) {
   const records = await prisma.serviceRecord.findMany({ where: { vehicleId }, orderBy: { date: "desc" } });
   return records.map(recordToEngine);
 }
+
+/** Case/whitespace-insensitive plate match, for the anonymous owner self-lookup. */
+export async function loadVehicleByPlate(plate: string) {
+  const normalized = plate.trim().toUpperCase().replace(/\s+/g, "");
+  const vehicles = await prisma.vehicle.findMany({ include: { items: true } });
+  const match = vehicles.find((v) => v.plate.trim().toUpperCase().replace(/\s+/g, "") === normalized);
+  if (!match) return null;
+  const owner = await prisma.owner.findUnique({ where: { id: match.ownerId } });
+  if (!owner) return null;
+  return {
+    vehicle: vehicleToEngine(match),
+    owner: ownerToEngine(owner),
+  };
+}
