@@ -1,0 +1,136 @@
+// P09 — Vehicle Service Due Predictor
+//
+// Rule is stored flat (ruleKind discriminant + every rule's fields nullable)
+// rather than three separate tables, since exactly one rule kind applies per
+// item and the engine layer (src/engine/*) is the single source of truth for
+// what each field means - the schema just needs to hold them.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model WorkshopUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  /// admin | workshop | viewer
+  role         String
+  createdAt    DateTime @default(now())
+
+  sessions AuthSession[]
+
+  @@map("p09_workshop_users")
+}
+
+model AuthSession {
+  tokenHash String   @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user WorkshopUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("p09_auth_sessions")
+}
+
+model Owner {
+  id    String @id @default(cuid())
+  name  String
+  phone String
+  /// Not in the official dataset - assigned deterministically for display.
+  area  String
+  /// ISO date. Not in the official dataset - assigned deterministically for display.
+  since String
+
+  vehicles Vehicle[]
+
+  @@map("p09_owners")
+}
+
+model Vehicle {
+  id      String @id @default(cuid())
+  ownerId String
+
+  make  String
+  model String
+  /// Not in the official dataset - derived deterministically for display only.
+  year  Int
+  plate String
+  /// Hex colour. Not in the official dataset - derived deterministically for display only.
+  colour   String
+  bodyType String
+
+  odometerKm     Int
+  odometerReadAt String
+  /// Derived from the case's own odometer_readings history (see fixture.ts), not assigned.
+  avgKmPerDay Int
+
+  owner   Owner           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  items   ServiceItem[]
+  records ServiceRecord[]
+
+  @@index([ownerId])
+  @@map("p09_vehicles")
+}
+
+model ServiceItem {
+  id        String @id @default(cuid())
+  vehicleId String
+
+  /// Stable code shared with service history, e.g. ENGINE_OIL.
+  code     String
+  label    String
+  category String
+  zone     String
+  cost     Int
+
+  /// fixedDate | interval | distance
+  ruleKind String
+
+  // fixedDate
+  dueDate       String?
+  renewalMonths Int?
+
+  // interval (and lastDoneDate is also used by distance)
+  months       Int?
+  lastDoneDate String?
+
+  // distance
+  intervalKm       Int?
+  lastDoneOdometer Int?
+
+  vehicle Vehicle         @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  records ServiceRecord[]
+
+  @@unique([vehicleId, code])
+  @@index([vehicleId])
+  @@map("p09_service_items")
+}
+
+model ServiceRecord {
+  id        String @id @default(cuid())
+  vehicleId String
+  itemId    String
+
+  itemCode   String
+  label      String
+  date       String
+  odometer   Int
+  cost       Int
+  technician String
+  notes      String?
+
+  vehicle Vehicle     @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  item    ServiceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([vehicleId])
+  @@map("p09_service_records")
+}

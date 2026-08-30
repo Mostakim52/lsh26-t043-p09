@@ -1,0 +1,41 @@
+# Render Blueprint — one-click provisioning for the P09 backend.
+#
+# Usage: Render dashboard -> New -> Blueprint -> select this repo. Render
+# reads this file and pre-fills the service; you only need to paste in the
+# three values marked `sync: false` below (Render prompts for each during
+# setup) rather than typing every field by hand.
+#
+# The database itself is Supabase (external), not defined here — this
+# blueprint only provisions the web service. Auth is a Bearer token, not a
+# cookie, so FRONTEND_ORIGIN only needs to be correct for CORS — there is no
+# SameSite/credentials-mode complexity to get wrong here.
+
+services:
+  - type: web
+    name: p09-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    # --include=dev is required: NODE_ENV=production below makes npm skip
+    # devDependencies by default, which is where typescript/@types/*/prisma
+    # live - the build would otherwise fail with "implicitly has an any type"
+    # on every Express/Node import.
+    #
+    # prisma generate MUST run before the TypeScript build, not after: tsc
+    # needs @prisma/client's generated types to compile any code that touches
+    # PrismaClient, and on a fresh clone there is no pre-existing generated
+    # client to fall back on.
+    buildCommand: npm ci --include=dev && npx prisma generate && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Do not add PORT here — Render injects its own and the app already
+      # reads process.env.PORT (see backend/src/config/env.ts).
+      - key: FRONTEND_ORIGIN
+        value: https://servicedeskt043.vercel.app
+      - key: DATABASE_URL
+        sync: false # Supabase pooled connection string (port 6543)
+      - key: DIRECT_URL
+        sync: false # Supabase direct connection string (port 5432), used
+                    # only if a migration is ever run from Render itself

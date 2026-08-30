@@ -1,0 +1,41 @@
+{
+  "name": "p09-vehicle-service-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "P09 Vehicle Service Due Predictor - backend API",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:seed:users": "tsx src/db/seedUsers.ts"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "express": "^5.2.1",
+    "@prisma/client": "^6.19.3",
+    "zod": "^4.5.4",
+    "cors": "^2.8.6",
+    "helmet": "^8.3.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "tsx": "^4.23.13",
+    "prisma": "^6.19.3",
+    "vitest": "^4.1.11",
+    "supertest": "^7.2.2",
+    "@types/node": "^26.4.0",
+    "@types/express": "^5.0.6",
+    "@types/cors": "^2.8.19",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/supertest": "^7.2.1"
+  }
+}
