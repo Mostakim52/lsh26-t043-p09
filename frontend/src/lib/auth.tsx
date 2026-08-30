@@ -98,7 +98,7 @@ export async function logoutViaBackend(token: string | null) {
 // ---------------------------------------------------------------- dev dummy
 const DEV_USER: AuthUser = {
   id: 'dev-user',
-  email: 'dev@shahjalal.local',
+  email: 'dev@servicedesk.local',
   name: 'Dev Workshop',
   role: 'admin',
 };

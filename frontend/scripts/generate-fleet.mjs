@@ -325,7 +325,7 @@ history.sort((a, b) => b.date.localeCompare(a.date));
 
 const fleet = {
   meta: {
-    workshop: 'Shahjalal Auto Care',
+    workshop: 'Service Desk',
     city: 'Dhaka',
     currency: 'BDT',
     generatedAt: ANCHOR,

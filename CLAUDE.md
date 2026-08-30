@@ -71,7 +71,7 @@ Sorted newest-first when returned.
 
 ### 3.5 Fleet wrapper
 ```json
-{ "meta": { "workshop": "Shahjalal Auto Care", "city": "Dhaka", "currency": "BDT", "generatedAt": "2026-08-30", "seed": 20260830 }, "owners": [...], "vehicles": [...], "history": [...] }
+{ "meta": { "workshop": "Service Desk", "city": "Dhaka", "currency": "BDT", "generatedAt": "2026-08-30", "seed": 20260830 }, "owners": [...], "vehicles": [...], "history": [...] }
 ```
 - `generatedAt` is the anchor `today`. Backend should treat the `today` query param (or server date) as `asOf`. Never use wall clock inside the data file.
 
@@ -275,13 +275,13 @@ Workshop login. Frontend POSTs from `LoginView` and `src/lib/auth.tsx:loginViaBa
 
 Request:
 ```json
-{ "email": "workshop@shahjalal.local", "password": "••••••••" }
+{ "email": "workshop@servicedesk.local", "password": "••••••••" }
 ```
 `email` may be an email or phone/username — backend should accept any non-empty identifier that matches an `Owner`-adjacent workshop user. Trim + case-insensitive for email.
 
 Success `200`:
 ```json
-{ "token": "jwt-or-opaque", "user": { "id": "USR-001", "email": "workshop@shahjalal.local", "name": "Shahjalal Workshop", "role": "admin|workshop|viewer" } }
+{ "token": "jwt-or-opaque", "user": { "id": "USR-001", "email": "workshop@servicedesk.local", "name": "Service Desk", "role": "admin|workshop|viewer" } }
 ```
 Also accept `{ "access_token": "...", "user": {...} }`. Frontend stores `token` in `localStorage` under `servicedesk.auth.token.v1` and sends `Authorization: Bearer <token>` on every subsequent call (see `src/lib/api.ts:authHeader()`).
 
@@ -334,8 +334,8 @@ Backend wiring:
 
 Related: `src/three/CarModel.tsx:139`, `src/three/CarStage.tsx:132`, `src/components/VehicleView.tsx:99`.
 
-### 9.2 Hand + key — `src/three/HandKey.tsx` (login only)
-Procedural hand holding a car key fob (no `.glb`, `FloatRig` + `RoundedBox` + `ContactShadows` + `Environment` with `Lightformer`; `hasWebGL()` → `handkey-fallback` CSS card). `HandKeyStage` renders at `300px` in `LoginView`'s `login__stage` with a soft glow + pricing strip underneath (BREEZY layout). Login's left showcase provides the moody gradient/grid backdrop; the 3D is the hero object (like BREEZY's top-down convertible).
+### 9.2 Car key — `src/three/HandKey.tsx` (login only)
+Procedural floating car key fob (no `.glb`, `FloatRig` + `RoundedBox` + `ContactShadows` + `Environment` with `Lightformer`; `hasWebGL()` → `handkey-fallback` CSS card). `HandKeyStage` renders at `300px` in `LoginView`'s `login__stage` with a soft glow + pricing strip underneath (BREEZY layout). Login's left showcase provides the moody gradient/grid backdrop; the 3D is the hero object (like BREEZY's top-down convertible). Hand mesh was removed — key fob only, as requested.
 
 Fallback: centred `🔑 Workshop key` card when WebGL is off — no blank.
 
@@ -376,20 +376,30 @@ frontend/
     styles/global.css       Tokens (+ [data-theme='light'] overrides), layout, hero, stage, cards, call list, vehicle, dialog, banners, login
   public/data/fleet.json    Sample fleet (scripts/generate-fleet.mjs, SEED 20260830, ANCHOR 2026-08-30)
   scripts/generate-fleet.mjs  Deterministic generator (prng mulberry32) — status mix back-solved
-  .env.example / .env        VITE_API_BASE_URL, VITE_DUE_SOON_DAYS, VITE_DEV_AUTH
+  .env.example / .env        VITE_API_BASE_URL (+ local vs deployed), VITE_DUE_SOON_DAYS, VITE_DEV_AUTH
   vite.config.ts  package.json  tsconfig.*
 ```
+
+**Responsiveness — every page is mobile-first and verified down to 320 px (`src/styles/global.css`):**
+- Header nav collapses to burger at `940px` (`nav[data-open]`), `source-pill` hides.
+- Hero `grid-template-columns: 1.1fr 0.9fr → 1fr` at `900px`, stats `4→2→1` columns at `900/460`.
+- Stage heights use `clamp(240px,38vw,400px)`, `ContactShadows` scales.
+- Login split `1.1fr 0.9fr → 1fr` at `900px` (showcase `520px` min-height, stage `300→260px`), `@560px` full-bleed.
+- Fleet/owner grids `auto-fill 280px`, tables `responsive` stack to cards at `860px`, call list `46px+1fr+auto → 34px+1fr` at `780px`, vehicle hero `1.15fr 1fr → 1fr` at `900px`, timeline `96px+1fr+auto → 1fr+auto` at `620px`, banners/dialog stack similarly. No horizontal scroll at any width.
 
 ---
 
 ## 11) Environment
 
 ```
-VITE_API_BASE_URL=http://localhost:8000/api/v1   # empty = sample mode
+# frontend/.env  (copy from frontend/.env.example)
+VITE_API_BASE_URL=http://localhost:8000/api/v1   # empty = sample mode (uses public/data/fleet.json + src/engine/*)
+# deployed example: VITE_API_BASE_URL=https://your-app.onrender.com/api/v1
 VITE_DUE_SOON_DAYS=30
 VITE_DEV_AUTH=true                                # show Dev bypass on login (set false in prod)
 ```
-Backend should mirror `DUE_SOON_DAYS` and `PRIORITY_WEIGHTS` from §4/§5. Do not let frontend and backend drift — RulesView renders from `GET /rules` so the docs match the calculation. `VITE_DEV_AUTH` is frontend-only; backend can ignore it.
+- `.env` lives in `frontend/` (see `frontend/.env` and `frontend/.env.example`). Git tracks `.env` but ignores `.env.local` / `*.local` — put personal/backend-dev URLs in `.env.local`, or edit `frontend/.env` directly. `VITE_API_BASE_URL` must be the full `/api/v1` base; frontend joins paths like `${BASE}/vehicles`. Restart `npm run dev` after changing `.env`.
+- Backend should mirror `DUE_SOON_DAYS` and `PRIORITY_WEIGHTS` from §4/§5. Do not let frontend and backend drift — RulesView renders from `GET /rules` so the docs match the calculation. `VITE_DEV_AUTH` is frontend-only; backend can ignore it.
 
 ---
 

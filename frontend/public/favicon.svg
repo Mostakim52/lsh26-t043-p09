@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="ServiceDesk">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3d7bff"/>
+      <stop offset="100%" stop-color="#1b3ea8"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="9" fill="url(#g)"/>
+  <text x="50%" y="58%" dominant-baseline="middle" text-anchor="middle" font-family="Archivo, Helvetica, Arial, sans-serif" font-weight="800" font-style="italic" font-size="13" fill="#fff" letter-spacing="-0.04em">SD</text>
+</svg>

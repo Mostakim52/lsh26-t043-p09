@@ -54,7 +54,7 @@ export function LoginView() {
           <header className="login__brand">
             <span className="login__brand-mark" aria-hidden="true">SD</span>
             <span className="login__brand-word">Service<span>Desk</span></span>
-            <span className="login__brand-sub">Shahjalal Auto Care · Dhaka</span>
+            <span className="login__brand-sub">Service Desk · Dhaka</span>
           </header>
 
           <div className="login__showcase-head">
@@ -76,17 +76,17 @@ export function LoginView() {
             <div className="login__stage-glow" aria-hidden="true" />
           </div>
 
-          {/* bottom pricing strip — mirrors BREEZY BASIC $6 / ELITE $20 */}
+          {/* bottom pricing strip — mirrors BREEZY BASIC $6 / ELITE $20 — BDT */}
           <div className="login__strip">
             <div className="login__strip-item">
               <span className="login__strip-label">BASIC<br />WASH</span>
-              <span className="login__strip-price">$6</span>
+              <span className="login__strip-price">৳600</span>
               <span className="login__strip-meta">- FOOMING - CLEAN WASH<br />- DRY VACUUM - PALLETE</span>
             </div>
             <div className="login__strip-div" aria-hidden="true" />
             <div className="login__strip-item">
               <span className="login__strip-label">ELITE<br />WASH</span>
-              <span className="login__strip-price">$20</span>
+              <span className="login__strip-price">৳2,000</span>
               <span className="login__strip-meta">- FOOMING - CLEAN WASH<br />- DRY VACUUM - PALLETE</span>
             </div>
           </div>
@@ -148,9 +148,9 @@ export function LoginView() {
 
               <div className="login__row">
                 <span className="login__backend-note">
-                  {backendConfigured ? 'Backend: live' : 'Backend: sample mode — use Dev Login'}
+                  {backendConfigured ? 'Backend: live' : 'If Backend is offline: sample mode — use Dev Bypass'}
                 </span>
-                <button type="button" className="login__link" onClick={() => alert('Contact Shahjalal Auto Care admin to reset your password.')}>
+                <button type="button" className="login__link" onClick={() => alert('Contact Service Desk admin to reset your password.')}>
                   Forgot password?
                 </button>
               </div>

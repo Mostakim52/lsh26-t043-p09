@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+.history/
+
+# Node (if backend added later)
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Env local overrides
+.env.local
+*.local
+
+# Logs
+logs/
+npm-debug.log*
