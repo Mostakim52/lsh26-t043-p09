@@ -1,0 +1,79 @@
+{
+  "team_id": "LSH26-T043",
+  "problem_id": "P09",
+  "repository_name": "lsh26-t043-p09",
+  "live_url": "https://servicedeskt043.vercel.app",
+  "demo_video_url_optional": "",
+  "event_start_code": "LSH26-8490-C900",
+  "repository_created_before_release": false,
+  "pre_event_materials": [],
+  "sample_data": {
+    "loads_published_fixture": true,
+    "method": "Seeded into a Postgres (Supabase) database via `npm run db:seed` in backend/, sourced from the organizer-published P09_vehicle_service_public.json fixture (case PUB-01: 27 owners, 42 vehicles, 165 service items, 99 service records).",
+    "reset_instructions": "Run `npm run db:seed` in backend/ to wipe and reload the fleet from the published fixture. Run `npm run db:seed:users` to reset the two demo workshop accounts. Both are idempotent (delete-then-recreate / upsert-by-email)."
+  },
+  "problem_solving_method": "Built a REST backend (Express + Prisma + Supabase Postgres) implementing the exact calculation contract the frontend's own reference engine defines: next-due-date projection per rule kind (fixed date, monthly interval, distance), overdue/due-soon/fine classification, priority-ranked daily call list, and completion resets. The engine files were copied verbatim from the frontend's src/engine/* and verified against the frontend's own engine.test.ts spec (29/29 passing), so backend and frontend can never drift on the domain math. Auth uses an opaque Bearer token (SHA-256 hashed server-side) rather than cookies, avoiding cross-site cookie complexity entirely. Added a second sign-in mode letting a vehicle owner look up their own car by license plate through an anonymous, PII-redacted endpoint, without needing an account.",
+  "requirements": {
+    "R1": {
+      "status": "complete",
+      "evidence": "backend/src/db/seed.ts + backend/prisma/schema.prisma — 27 owners across 42 vehicles seeded from the published fixture, each vehicle carrying 3+ service items spanning all three rule kinds, an odometer reading, and past service history. Verified live via GET /api/v1/fleet."
+    },
+    "R2": {
+      "status": "complete",
+      "evidence": "backend/src/engine/schedule.ts (ported verbatim from frontend/src/engine/schedule.ts) + backend/src/api/fleet.ts (GET /api/v1/vehicles, GET /api/v1/vehicles/:id) — computes nextDueDate/daysUntil/status per item, distance items estimated from avgKmPerDay. Passes all 29 assertions in the frontend's own engine.test.ts when run against this code (backend/src/engine/engine.test.ts)."
+    },
+    "R3": {
+      "status": "complete",
+      "evidence": "backend/src/engine/callList.ts (ported verbatim) + GET /api/v1/call-list — returns only vehicles with overdue/dueSoon items, ranked descending by priority.total, each with a human-readable talkingPoints array. Live-verified sort order and non-empty talking points."
+    },
+    "R4": {
+      "status": "complete",
+      "evidence": "backend/src/api/fleet.ts GET /api/v1/vehicles/:id (item list + cost + history) and backend/src/api/services.ts POST /api/v1/vehicles/:vehicleId/services (records a completion, resets the item's rule via the ported backend/src/engine/complete.ts, moves the odometer forward, grows history) inside a single Prisma transaction. Live-verified: completing an interval item reset lastDoneDate, moved the odometer up, and the new record appeared in history."
+    }
+  },
+  "team_members": [
+    {
+      "registered_name": "Mostakim Hossain",
+      "github_username": "Mostakim52",
+      "major_contribution": "Built and deployed the entire frontend: React + Vite + Three.js app (procedural car and key-fob models, no external assets), all pages (Today/Fleet/Owners/Vehicle/Rules), the login screen, hash router, theme system, and the original Vercel deployment at servicedeskt043.vercel.app.",
+      "evidence_paths_or_commits": [
+        "frontend/src",
+        "c864b12",
+        "482696c"
+      ]
+    },
+    {
+      "registered_name": "jahin-7",
+      "github_username": "jahin-7",
+      "major_contribution": "Built the entire backend (Express + Prisma + Supabase Postgres): the calculation engine port, Bearer-token auth with 2 seeded demo accounts, all REST endpoints, the anonymous vehicle-owner plate-lookup feature with PII redaction, 49 automated backend tests, and the Render deployment. Wired the frontend's login screen to the live backend and added the demo-credentials panel.",
+      "evidence_paths_or_commits": [
+        "backend/src",
+        "frontend/src/components/LoginView.tsx",
+        "frontend/src/components/MyVehicleView.tsx",
+        "167d722",
+        "79732ab"
+      ]
+    }
+  ],
+  "major_design_decisions": [
+    "Bearer-token auth (opaque token, SHA-256 hash stored server-side) instead of cookie sessions — sidesteps cross-site cookie/SameSite complexity entirely for a frontend and backend on different domains.",
+    "The backend's calculation engine (schedule.ts, callList.ts, complete.ts, dates.ts) is copied byte-for-byte from the frontend's own src/engine/*, which is also the offline fallback and the test spec — backend and frontend cannot drift on domain math because they share the literal source.",
+    "The Postgres database is a Supabase project shared with the team's other submitted problem; every P09 table is Prisma-mapped with a p09_ prefix so the two projects' schemas cannot collide.",
+    "Added a second sign-in mode for vehicle owners: enter a license plate, get a read-only status page for that one vehicle, via an anonymous endpoint that redacts the owner's phone/area/since-date so a plate visible on the car itself can't be turned into a stranger's contact details."
+  ],
+  "known_limitations": [
+    "The backend runs on Render's free tier, which spins down after inactivity — the first request after an idle period can take up to ~50 seconds.",
+    "Only one of the 25 published fixture cases (PUB-01) is seeded as the live dataset; there is no admin UI to switch between cases.",
+    "Offline/sample mode (no VITE_API_BASE_URL configured) renders from the bundled static frontend/public/data/fleet.json snapshot rather than live backend data — intended only as a demo fallback.",
+    "The plate lookup does an exact, case/whitespace-normalized string match; it does not fuzzy-match typos beyond that normalization."
+  ],
+  "ai_tools_used": [
+    {
+      "tool": "Claude Code (Anthropic)",
+      "used_for": "Backend implementation (Express routes, Prisma schema and migrations, the ported calculation engine, Bearer-token auth), the Supabase/Render/Vercel deployment work, and the vehicle-owner plate-lookup feature.",
+      "how_output_was_verified": "The ported engine was run against the frontend's own engine.test.ts spec (29/29 passing). 20 additional backend route tests were written and run (49/49 passing total). Every endpoint was further checked with live HTTP calls against the production Supabase database, including a real service-completion POST verified against before/after database state, and the deployed frontend was exercised in a real browser against the live backend."
+    }
+  ],
+  "licenses_file": "LICENSES.md",
+  "declaration": "The information above is complete and truthful to the best of the team's knowledge."
+}

@@ -1,33 +1,30 @@
 # EVENT.md
 
-## Team & Problem
-
 | Field | Value |
 | --- | --- |
-| Team ID | **t043** |
-| Problem ID | **p09** |
-| Event start code | **LSH26-8490-C900** |
-| Repository | (this repository) |
+| Team ID | t043 |
+| Problem ID | p09 |
+| Event start code | LSH26-8490-C900 |
 
 ## Pre-existing work declaration
 
-As of the event start (06:00 pm), this repository contained **no pre-existing work**.
+As of 06:00 pm on the event start date, this repository contained **no pre-existing
+work**. The project directory was empty — no source files, no assets, no
+configuration, and no prior Git history. The first commit (`cf5c643`, "Initial
+commit") lands at 18:02 on the event date, two minutes after the declared start
+time, and every commit since was made the same day.
 
-The working directory was empty at the time of the first commit — no source files,
-no configuration, no assets, no prior Git history. Everything committed to this
-repository from this commit onward was created during the event by team **t043**.
+Everything committed from that point onward was created during the event by
+team t043: the frontend (`c864b12` "Frontend V1" through `482696c` "Frontend
+V3") by Mostakim Hossain, and the backend, authentication, Supabase
+integration, and vehicle-owner license-plate lookup feature by jahin-7.
 
-Third-party dependencies installed through a package manager (and their lockfiles)
-are not authored by the team and are declared as such; any additional pre-existing
-or externally sourced material introduced later will be declared in the commit that
-adds it.
+No third-party code, templates, or boilerplate were present before 06:00 pm.
+Third-party libraries introduced afterward (Express, Prisma, React, Vite,
+Three.js, etc.) are declared in `backend/package.json` and
+`frontend/package.json`, and are used under their respective licenses.
 
-## Git history
+## Repository rules acknowledged
 
-Git history in this repository will not be squashed, deleted, or rewritten after
-06:00 pm. No force pushes, no rebases of pushed commits, no history edits. Judges
-can read the history as it was written.
-
-## Visibility
-
-This repository is public and will remain public until results are announced.
+- This repository is public and will remain public until results are announced.
+- Git history will not be squashed, deleted, or rewritten after 06:00 pm.
